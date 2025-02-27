@@ -1,0 +1,25 @@
+{
+  "name": "frappe-ui-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --base=/assets/trackit/mobile/ && yarn copy-html-entry",
+    "preview": "vite preview",
+    "copy-html-entry": "cp ../trackit/public/mobile/index.html ../trackit/www/mobile.html"
+  },
+  "dependencies": {
+    "@internationalized/date": "^3.7.0",
+    "feather-icons": "^4.29.2",
+    "frappe-ui": "^0.1.111",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "autoprefixer": "^10.4.2",
+    "postcss": "^8.4.5",
+    "tailwindcss": "^3.0.15",
+    "vite": "^6.2.0"
+  }
+}
