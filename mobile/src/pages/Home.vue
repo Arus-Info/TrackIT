@@ -1,37 +1,59 @@
 <template>
-  <div class="max-w-3xl py-12 mx-auto">
-    <h2 class="font-bold text-lg text-gray-600 mb-4">
-      Welcome {{ session.user }}!
-    </h2>
-
-    <Button theme="gray" variant="solid" icon-left="code" @click="ping.fetch" :loading="ping.loading">
-      Click to send 'ping' request
-    </Button>
-    <div>
-      {{ ping.data }}
+  <div class=" sm:w-96 font-[Inter]">
+    <div class=" pt-[16px] flex flex-col items-center justify-center">
+      <div
+        class=" w-[322px] h-11 bg-[#F2F2F2] flex items-center justify-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
+        <p class="text-[#4A6BB6] font-[800] text-2xl">TrackIT</p>
+      </div>
+      <div class="pt-[30px]">
+        <div class=" text-center">
+          <img src="../images/home_page.png" />
+        </div>
+      </div>
     </div>
-    <pre>{{ ping }}</pre>
-
-    <div class="flex flex-row space-x-2 mt-4">
-      <Button @click="showDialog = true">Open Dialog</Button>
-      <Button @click="session.logout.submit()">Logout</Button>
+    <div class=" pt-15 flex justify-evenly ">
+      <button>
+        <div class="w-[149px] h-10 bg-[#4A6BB6]  
+                    drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] 
+                    flex items-center justify-center
+                    rounded-[10px]">
+          <div class="text-white font-[800]">WorkIT</div>
+        </div>
+      </button>
+      <button>
+        <div class="w-[149px] h-10 bg-[#4A6BB6]  
+                    drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] 
+                    flex items-center justify-center
+                    rounded-[10px]">
+          <div class="text-white font-[800]">ProjectIT</div>
+        </div>
+      </button>
     </div>
-
-    <!-- Dialog -->
-    <Dialog title="Title" v-model="showDialog"> Dialog content </Dialog>
   </div>
+
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Dialog } from 'frappe-ui'
+import { ref,inject } from 'vue'
 import { createResource } from 'frappe-ui'
-import { session } from '../data/session'
+import { useRouter } from 'vue-router'
+import { userResource } from '../data/user'
 
-const ping = createResource({
-  url: 'ping',
+const router = useRouter()
+
+const employee = inject('employee_id')
+
+const employeeResource = createResource({
+  type: "POST",
+  url: "trackit.api.get_employee_id",
+  makeParams() {
+    return {
+      user_id: userResource.data
+    }
+  },
+  onSuccess(d) {
+    employee.name = d
+  },
   auto: true,
 })
-
-const showDialog = ref(false)
 </script>
