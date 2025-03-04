@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@internationalized/date": "^3.7.0",
+    "dayjs": "^1.11.13",
     "feather-icons": "^4.29.2",
     "frappe-ui": "^0.1.111",
     "vue": "^3.5.13",

@@ -1,33 +1,38 @@
 <template>
     <div class="flex items-center flex-col">
-        <img id="preview-image" />
+        <img id="preview-image" class="rounded-lg drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]" />
     </div>
-    <div class="flex items-center flex-col" v-if="!showPreview">
-        <video ref="video" autoplay muted hidden playsinline webkit-playsinline></video>
-        <canvas ref="canvas" width="350" height="500"></canvas>
-        <div class="pt-7 flex flex-row">
-                <div>
-                    <button @click="swapCamera">
-                        <FeatherIcon class="h-7 w-7" name="refresh-ccw" />
-                    </button>
-                </div>
-                <div>
-                    <button @click="captureImage">
-                        <FeatherIcon name="camera" class="h-10 w-10" />
-                    </button>
-                </div>
+    <div v-if="!showPreview">
+        <div class="flex justify-center">
+            <video ref="video" autoplay muted hidden playsinline webkit-playsinline></video>
+            <canvas ref="canvas" width="350" height="500"
+                class="rounded-lg drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]"></canvas>
+        </div>
+        <div class="pt-7 flex justify-evenly items-center">
+            <div>
+                <button @click="swapCamera">
+                    <div>
+                        <SwapIcon class=" h-7 w-7"></SwapIcon>
+                    </div>
+                </button>
+            </div>
+            <div>
+                <button @click="captureImage">
+                    <CameraIcon class=" h-10 w-10"></CameraIcon>
+                </button>
+            </div>
+            <div></div>
         </div>
     </div>
     <div v-else class="flex items-center flex-col pt-7">
-        <Button variant="solid" size="lg" @click="endCamera"> {{props.mode}} </Button>
-    </div>
-    <div class=" pt-3 pl-10">
-        <Button variant="solid" @click="emit('close-event', true)">Back</Button>
+        <PrimaryButton  @click="endCamera" :name="props.mode"> </PrimaryButton>
     </div>
 </template>
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { FeatherIcon } from "frappe-ui";
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import SwapIcon from '../pages/icons/SwapIcon.vue';
+import CameraIcon from '../pages/icons/CameraIcon.vue';
+import PrimaryButton from './PrimaryButton.vue';
 
 const props = defineProps({
     mode : String

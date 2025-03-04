@@ -12,22 +12,8 @@
       </div>
     </div>
     <div class=" pt-15 flex justify-evenly ">
-      <button>
-        <div class="w-[149px] h-10 bg-[#4A6BB6]  
-                    drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] 
-                    flex items-center justify-center
-                    rounded-[10px]">
-          <div class="text-white font-[800]">WorkIT</div>
-        </div>
-      </button>
-      <button>
-        <div class="w-[149px] h-10 bg-[#4A6BB6]  
-                    drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] 
-                    flex items-center justify-center
-                    rounded-[10px]">
-          <div class="text-white font-[800]">ProjectIT</div>
-        </div>
-      </button>
+      <ThemeButton name="WorkIT" @click="router.push({name : 'WorkIT'})"></ThemeButton>
+      <ThemeButton name="ProjectIT"></ThemeButton>
     </div>
   </div>
 
@@ -38,6 +24,7 @@ import { ref,inject } from 'vue'
 import { createResource } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import { userResource } from '../data/user'
+import ThemeButton from '../components/ThemeButton.vue'
 
 const router = useRouter()
 
