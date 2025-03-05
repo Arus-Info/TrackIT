@@ -1,4 +1,5 @@
 import frappe
+from datetime import date
 
 @frappe.whitelist()
 def get_employee_id(user_id):
@@ -10,8 +11,8 @@ def get_employee_id(user_id):
 def get_project_allocation(employee_id):
     project_list = frappe.db.sql("""
         select pai.project_name
-        from `tabEmployee Allocation Instruction` as  eai
-        left join `tabProject Allocation and Instrucions` as  pai on eai.parent = pai.name
+        from `tabProject Allocation and Instrucions` as  pai 
+        left join `tabEmployee Allocation Instruction` as  eai on eai.parent = pai.name
         where eai.employee = %(employee_id)s 
         """,{"employee_id" : employee_id},as_dict = True)
     return project_list
@@ -65,3 +66,52 @@ def get_header_info():
     app_logo = frappe.get_single("Navbar Settings").app_logo
     company = frappe.get_single("Global Defaults").default_company
     return app_logo,company
+
+@frappe.whitelist()
+def get_instructions(project_name,employee_id):
+    data = frappe.db.sql("""
+        SELECT pai.work_instruction, eai.instructions
+        FROM `tabProject Allocation and Instrucions` as pai
+        LEFT JOIN `tabEmployee Allocation Instruction` as eai
+            ON eai.employee =  %(employee)s and eai.parent = pai.name
+        WHERE pai.project_name = %(project_name)s
+        ORDER BY  eai.modified DESC
+        LIMIT 1
+        """,{"employee" : employee_id,"project_name" : project_name},as_dict=True)
+    return data 
+
+@frappe.whitelist()
+def get_team_members(project_name):
+    
+    data = frappe.db.sql("""
+
+
+        select project_name,
+        CONCAT('[',GROUP_CONCAT(JSON_OBJECT("employee_name",employee_name,"activity" , activity)),']') as members
+        from(
+            select eai.employee_name, pai.project_name, case when t.start_date then 'active' else 'inactive' end as activity
+            from `tabProject Allocation and Instrucions` as pai
+            left join `tabEmployee Allocation Instruction` as eai on eai.parent = pai.name
+            left join `tabTimesheet` as t
+                on 
+                    t.employee = eai.employee 
+                    and t.parent_project = pai.project 
+                    and t.start_date = %(today)s
+                    and t.docstatus = 0
+            where pai.project_name = %(project_name)s
+            ) as ts
+        
+        """,{ "today" : date.today(),"project_name" : project_name},as_dict = True)
+
+    return data
+
+@frappe.whitelist()
+def get_employee_schedule(date,employee_id):
+    project_list = frappe.db.sql("""
+        select pai.project_name
+        from `tabEmployee Allocation Instruction` as  eai 
+        left join `tabProject Allocation and Instrucions` as  pai on eai.parent = pai.name
+        where eai.employee = %(employee_id)s 
+        """,{"employee_id" : employee_id},as_dict = True)
+    
+    return project_list

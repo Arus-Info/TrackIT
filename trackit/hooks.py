@@ -243,4 +243,4 @@ app_license = "mit"
 # }
 
 
-website_route_rules = [{'from_route': '/mobile/<path:app_path>', 'to_route': 'mobile'},]
+website_route_rules = [{'from_route': '/trackit/<path:app_path>', 'to_route': 'trackit'},]

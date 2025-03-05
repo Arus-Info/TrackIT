@@ -10,13 +10,18 @@
             </div>
             </li>
         </ul>
+        <div v-if="! props.noData" class="bg-[#D6E1F9] pt-4 pb-4 rounded-lg">
+           <p class="text-center text-[#4A6BB6]"> No Resource Found</p>
+        </div>
     </div>
 </template>
 <script setup>
 import { ref } from 'vue';
 
 const props = defineProps({
-    dataList : Object
+    noData : Boolean,
+    dataList : Object,
+
 })
 const emit = defineEmits(   ['select-event'])
 

@@ -5,12 +5,12 @@
     <div v-if="!showCamera">
         <div v-if="actionName == 'Check-In'">
             <div class=" pt-7 pl-6 pr-6 font-[Inter] font-[600]">
-                <SelectionList :dataList="projectAllocationResource" @select-event="handleProjectSelection($event)">
+                <SelectionList :dataList="projectAllocationResource" @select-event="handleProjectSelection($event)" :noData="isProjectAllocated">
                 </SelectionList>
             </div>
         </div>
         <div v-else class=" pl-6 pr-6 pt-7 pb-4">
-            <div class="bg-[#B9C8EA] pt-3 pb-3 pl-4 pr-3 rounded-t-md flex gap-2">
+            <div class="bg-[#B9C8EA] pt-3 pb-3 pl-4 pr-3 rounded-t-md flex gap-3">
                 <ProjectOutline class=" h-6 w-6"></ProjectOutline>
                 <p class="text-[#4A6BB6] font-[600] font-[Inter]"> {{ projectName }}</p>
             </div>
@@ -23,9 +23,12 @@
                     <p>Additional Photo without Checkout</p>
                 </div>
             </div>
-            <div class=" pt-6">
-                <!-- <Instructions ></Instructions> -->
-            </div>
+        </div>
+        <div class=" pl-6 pr-6 pt-7 pb-4" v-if="projectName != ''">
+                <Instructions :instructions="instructions" ></Instructions>
+                <div class="pt-5">
+                    <TeamMembers :members="members"></TeamMembers>
+                </div>
         </div>
     </div>
     <div v-if="showCamera" class=" pt-7">
@@ -49,6 +52,8 @@ import dayjs from 'dayjs';
 import ProjectOutline from './icons/ProjectOutline.vue'
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import Instructions from './Instructions.vue';
+import { get_instructions } from '../data/work_instructions';
+import TeamMembers from './TeamMembers.vue';
 
 dayjs.extend(customParseFormat);
 
@@ -64,7 +69,7 @@ onMounted(async function () {
     timesheet.fetch()
     await projectAllocationResource.fetch()
     if (projectAllocationResource.data.length === 0) {
-        // isProjectAllocated.value = false
+        isProjectAllocated.value = false
     }
 })
 
@@ -77,10 +82,14 @@ const actionName = ref('Check-In')
 const cameraMode = ref('Check-In')
 const showCamera = ref(false)
 
+const isProjectAllocated = ref(true)
 const checkInImage = ref([])
 
 const errorMessage = ref('')
 const showError = ref(false)
+
+const instructions = ref({})
+const members =  ref({})
 
 const timesheet = createListResource({
     doctype: "Timesheet",
@@ -91,7 +100,7 @@ const timesheet = createListResource({
                 text: "Checked In",
                 icon: "check-circle",
                 position: "bottom-center",
-                iconClasses: "text-green-500",
+                iconClasses: "text-blue-500",
             });
             uploadAllAttachments("Timesheet", data.name, checkInImage.value)
         },
@@ -119,11 +128,10 @@ const timesheet = createListResource({
                 text: title,
                 icon: "check-circle",
                 position: "bottom-center",
-                iconClasses: "text-green-500",
+                iconClasses: "text-blue-500",
             });
         },
         onError(e) {
-            console.log(e)
             errorMessage.value = e
             showError.value = true
         }
@@ -135,8 +143,8 @@ const timesheet = createListResource({
             timesheetDetails.value = data[0]
             projectName.value = data[0].project_name
             projectId.value = data[0].project
-            // displayInstructions()
-            // teamMembers.fetch()
+            displayInstructions()
+            teamMembers.fetch()
         }
     },
     onError(e) {
@@ -155,10 +163,36 @@ const projectAllocationResource = createResource({
     }
 })
 
+function displayInstructions() {
+    let promise = get_instructions(dayjs().format("YYYY-MM-DD"),projectName.value,employee.name)
+    promise
+        .then((d)=>{
+            instructions.value = d
+        })
+}
+
+const teamMembers = createResource({
+    url : "trackit.api.get_team_members",
+    makeParams(){
+        return {
+            project_name : projectName.value
+        }
+    },
+    transform(data){
+        for (let d of data) {
+        d.members = JSON.parse(d.members)
+      }
+      return data  
+    },
+    onSuccess(d){
+        members.value = d[0].members
+    }
+})
+
 function handleProjectSelection(project_name) {
     projectName.value = project_name
-    // displayInstructions()
-    // teamMembers.fetch()
+    displayInstructions()
+    teamMembers.fetch()
     projectResource.update({
         filters: { "project_name": project_name },
     })
@@ -274,8 +308,8 @@ async function checkOut(){
             project: projectId.value,
         })
     }
-    // instructions.value = []
-    // members.value = []
+    instructions.value = []
+    members.value = []
     timesheet.setValue.submit({
         name: timesheetDetails.value.name,
         note: timesheetDetails.value.note + "<p> Check Out at " + dayjs().format("hh:mm:ss A") + "</p>",

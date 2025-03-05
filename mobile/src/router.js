@@ -21,7 +21,7 @@ const routes = [
 ]
 
 let router = createRouter({
-  history: createWebHistory('/mobile'),
+  history: createWebHistory('/trackit'),
   routes,
 })
 

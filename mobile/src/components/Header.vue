@@ -1,6 +1,6 @@
 <template>
     <div class=" bg-gradient-to-r from-[#4A6BB6] to-[#7F9DE0] h-16 flex items-center justify-between" v-if="companyInfo.data">
-        <div class=" pl-4">
+        <div class=" pl-4 pr-3" @click="router.push({name : 'Home'})" >
             <img :src="companyInfo.data[0]" />
         </div>
         <div class="text-[#e5e8ed] font-[700] text-[25px] font-[Inter]"> {{ companyInfo.data[1] }} </div>
