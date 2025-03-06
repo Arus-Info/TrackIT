@@ -13,10 +13,13 @@
     "@internationalized/date": "^3.7.0",
     "dayjs": "^1.11.13",
     "feather-icons": "^4.29.2",
+    "firebase": "^11.4.0",
     "frappe-ui": "^0.1.111",
     "vite-plugin-pwa": "^0.21.1",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "workbox-core": "^7.3.0",
+    "workbox-precaching": "^7.3.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
