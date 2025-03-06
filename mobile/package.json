@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/assets/trackit/mobile/ && yarn copy-html-entry && yarn copy-icon",
+    "build": "vite build --base=/assets/trackit/trackit/ && yarn copy-html-entry && yarn copy-icon",
     "preview": "vite preview",
-    "copy-html-entry": "cp ../trackit/public/mobile/index.html ../trackit/www/mobile.html",
-    "copy-icon": "cp -r ../mobile/src/images/ ../trackit/public/mobile/images/"
+    "copy-html-entry": "cp ../trackit/public/trackit/index.html ../trackit/www/trackit.html",
+    "copy-icon": "cp -r ../trackit/src/images/ ../trackit/public/trackit/images/"
   },
   "dependencies": {
     "@internationalized/date": "^3.7.0",

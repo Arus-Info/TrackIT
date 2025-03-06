@@ -56,7 +56,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: `../${path.basename(path.resolve('..'))}/public/mobile`,
+    outDir: `../${path.basename(path.resolve('..'))}/public/trackit`,
     emptyOutDir: true,
     target: 'es2015',
   },
