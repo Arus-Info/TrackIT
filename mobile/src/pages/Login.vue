@@ -5,6 +5,7 @@
       <div class="font-[Inter] font-[500] text-[20px] text-[#4A6BB6] pb-3 text-center"> 
         Login to TrackIT
       </div>
+      
       <form class="flex flex-col space-y-2 w-full" @submit.prevent="submit">
         <Input required name="email" type="text" placeholder="johndoe@email.com" label="User ID" />
         <Input required name="password" type="password" placeholder="••••••" label="Password" />
