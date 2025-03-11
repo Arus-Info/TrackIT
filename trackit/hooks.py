@@ -43,7 +43,7 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Project" : "public/js/project.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -144,6 +144,15 @@ app_license = "mit"
 # 		"on_trash": "method"
 # 	}
 # }
+
+doc_events = {
+    "Project" : {
+        "after_insert" : "trackit.trackit.project.after_insert_of_project"
+    },
+    "Timesheet" : {
+        "on_submit" : "trackit.trackit.timesheet.on_submit_of_timesheet"
+    }
+}
 
 # Scheduled Tasks
 # ---------------

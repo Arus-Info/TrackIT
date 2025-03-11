@@ -84,8 +84,6 @@ def get_instructions(project_name,employee_id):
 def get_team_members(project_name):
     
     data = frappe.db.sql("""
-
-
         select project_name,
         CONCAT('[',GROUP_CONCAT(JSON_OBJECT("employee_name",employee_name,"activity" , activity)),']') as members
         from(
@@ -115,3 +113,44 @@ def get_employee_schedule(date,employee_id):
         """,{"employee_id" : employee_id},as_dict = True)
     
     return project_list
+
+@frappe.whitelist()
+def project_with_members(employee_id):
+    
+    data = frappe.db.sql("""
+        select p.project_name,
+        CONCAT('[',GROUP_CONCAT(JSON_OBJECT("employee_name",employee_name,"activity" , activity)),']') as members
+        from(
+            select eai.employee_name, pai.project_name, case when t.start_date then 'active' else 'inactive' end as activity
+            from `tabProject Allocation and Instrucions` as pai 
+            right join `tabEmployee Allocation Instruction` as eai on eai.parent = pai.name
+            left join `tabTimesheet` as t
+                on 
+                    t.employee = eai.employee 
+                    and t.parent_project = pai.project 
+                    and t.start_date = %(today)s
+                    and t.docstatus = 0
+            ) as ts
+        RIGHT JOIN tabProject as p ON p.project_name = ts.project_name
+        WHERE p.status = 'Open'
+        GROUP BY project_name
+        
+        """,{ "today" : date.today()},as_dict = True)
+
+    return data
+
+@frappe.whitelist()
+def get_project_list():
+    project_list = frappe.get_list("Project",filters={"status" : 'Open'},fields=["project_name"])
+    return project_list 
+
+@frappe.whitelist()
+def get_modules_for_router(user_id):
+    employee_id = get_employee_id(user_id)
+    modules = frappe.get_list("Mobile Module",
+        parent_doctype = "Employee",
+        fields = ["module_name"],
+        filters={"parent" : employee_id},pluck="module_name")
+    modules.append('home')
+    modules = [m.lower() for m in modules ]
+    return modules
