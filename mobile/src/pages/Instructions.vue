@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-[#B9C8EA] pt-3 pb-3 pl-4 rounded-t-md flex gap-3">
+    <div class="bg-[#B9C8EA] pt-3 pb-3 pl-4 rounded-t-md flex gap-3" v-if="props.instructions">
         <InstructionsIcon class="h-6 w-6"></InstructionsIcon>
         <p class="font-[Inter] font-[600] text-[#4A6BB6]">Instructions</p>
     </div>

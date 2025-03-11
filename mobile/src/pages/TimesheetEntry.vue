@@ -1,39 +1,45 @@
 <template>
-    <div class=" pt-7 text-right pr-7" v-if="!showCamera">
-        <PrimaryButton @click="showCamera = true" :disabled="projectName == ''" :name="actionName"></PrimaryButton>
+    <div v-if="uploading" class="flex h-80 items-center justify-center">
+        <Spinner class=" h-12"></Spinner>
     </div>
-    <div v-if="!showCamera">
-        <div v-if="actionName == 'Check-In'">
-            <div class=" pt-7 pl-6 pr-6 font-[Inter] font-[600]">
-                <SelectionList :dataList="projectAllocationResource" @select-event="handleProjectSelection($event)" :noData="isProjectAllocated">
-                </SelectionList>
-            </div>
+    <div v-else>
+        <div class=" pt-7 text-right pr-7" v-if="!showCamera">
+            <PrimaryButton @click="showCamera = true" :disabled="projectName == ''" :name="actionName"></PrimaryButton>
         </div>
-        <div v-else class=" pl-6 pr-6 pt-7 pb-4">
-            <div class="bg-[#B9C8EA] pt-3 pb-3 pl-4 pr-3 rounded-t-md flex gap-3">
-                <ProjectOutline class=" h-6 w-6"></ProjectOutline>
-                <p class="text-[#4A6BB6] font-[600] font-[Inter]"> {{ projectName }}</p>
-            </div>
-            <div
-                class="bg-[#F5F8FF] pl-4 pr-3 pt-5 pb-3 rounded-b-md border-[#B9C8EA] border-x-2 border-b-2 flex flex-col gap-3">
-                <p> Check-In Time : {{ dayjs(timesheetDetails.from_time).format("hh:mm:ss a") }}</p>
-                <div @click="showCamera = true; cameraMode = 'Upload'"
-                    class="bg-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] rounded-sm pt-3 pb-3 pl-2 pr-2 flex gap-2">
-                    <FeatherIcon name="download" class="h-6 w-6" />
-                    <p>Additional Photo without Checkout</p>
+        <div v-if="!showCamera">
+            <div v-if="actionName == 'Check-In'">
+                <div class=" pt-7 pl-6 pr-6 font-[Inter] font-[600]">
+                    <SelectionList :dataList="projectAllocationResource" @select-event="handleProjectSelection($event)"
+                        :noData="isProjectAllocated">
+                    </SelectionList>
                 </div>
             </div>
-        </div>
-        <div class=" pl-6 pr-6 pt-7 pb-4" v-if="projectName != ''">
-                <Instructions :instructions="instructions" ></Instructions>
+            <div v-else class=" pl-6 pr-6 pt-7 pb-4">
+                <div class="bg-[#B9C8EA] pt-3 pb-3 pl-4 pr-3 rounded-t-md flex gap-3">
+                    <ProjectOutline class=" h-6 w-6"></ProjectOutline>
+                    <p class="text-[#4A6BB6] font-[600] font-[Inter]"> {{ projectName }}</p>
+                </div>
+                <div
+                    class="bg-[#F5F8FF] pl-4 pr-3 pt-5 pb-3 rounded-b-md border-[#B9C8EA] border-x-2 border-b-2 flex flex-col gap-3">
+                    <p> Check-In Time : {{ dayjs(timesheetDetails.from_time).format("hh:mm:ss a") }}</p>
+                    <div @click="showCamera = true; cameraMode = 'Upload'"
+                        class="bg-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] rounded-sm pt-3 pb-3 pl-2 pr-2 flex gap-2">
+                        <FeatherIcon name="download" class="h-6 w-6" />
+                        <p>Additional Photo without Checkout</p>
+                    </div>
+                </div>
+            </div>
+            <div class=" pl-6 pr-6 pt-7 pb-4" v-if="projectName != ''">
+                <Instructions :instructions="instructions"></Instructions>
                 <div class="pt-5">
                     <TeamMembers :members="members"></TeamMembers>
                 </div>
+            </div>
         </div>
-    </div>
-    <div v-if="showCamera" class=" pt-7">
-        <Camera :mode="cameraMode" @capture-event="handleImageCapture($event)" @close-event="showCamera = false">
-        </Camera>
+        <div v-if="showCamera" class=" pt-7">
+            <Camera :mode="cameraMode" @capture-event="handleImageCapture($event)" @close-event="showCamera = false">
+            </Camera>
+        </div>
     </div>
 
     <div v-if="showError">
@@ -42,7 +48,7 @@
 </template>
 <script setup>
 import { inject, ref, onMounted } from 'vue';
-import { createResource, createListResource, toast, FeatherIcon } from 'frappe-ui';
+import { createResource, createListResource, toast, FeatherIcon, Spinner } from 'frappe-ui';
 import { FileAttachment } from '../composables';
 import ErrorMessage from '../components/ErrorMessage.vue';
 import SelectionList from '../components/SelectionList.vue';
@@ -89,20 +95,69 @@ const errorMessage = ref('')
 const showError = ref(false)
 
 const instructions = ref({})
-const members =  ref({})
+const members = ref({})
+
+const timesheetEntry = ref({})
+
+const uploading = ref(false)
+
+const employeeCheckInResource = createListResource({
+    doctype: "Employee Checkin",
+    insert: {
+        onSuccess() {
+            toast({
+                title: "Success",
+                text: actionName.value === "Check-Out" ? "Checked-In" : "Checked-Out",
+                icon: "check-circle",
+                position: "bottom-center",
+                iconClasses: "text-blue-500",
+            });
+            uploading.value = false
+        }
+    }
+})
+
+async function get_current_location() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                insertCheckIns(position.coords.latitude, position.coords.longitude)
+            },
+            (error) => {
+                errorMessage.value = error.message
+                showError.value = true
+                uploading.value = false
+            }
+        )
+    }
+    else {
+        errorMessage.value = "Geolocation is not supported by your device"
+        showError.value = true
+        uploading.value = false
+    }
+}
+
+async function insertCheckIns(latitude, longitude) {
+    let time = actionName.value === "Check-Out" ? timesheetEntry.value.time_logs[0].from_time : timesheetEntry.value.time_logs[0].to_time
+    employeeCheckInResource.insert.submit({
+        employee: employee.name,
+        time: time,
+        log_type: actionName.value === "Check-Out" ? "IN" : "OUT",
+        custom_timesheet: timesheetEntry.value.name,
+        latitude: latitude,
+        longitude: longitude
+    })
+}
 
 const timesheet = createListResource({
     doctype: "Timesheet",
     insert: {
         onSuccess(data) {
-            toast({
-                title: "Success",
-                text: "Checked In",
-                icon: "check-circle",
-                position: "bottom-center",
-                iconClasses: "text-blue-500",
-            });
+            timesheetEntry.value = data
+            actionName.value = "Check-Out"
+            cameraMode.value = "Check-Out"
             uploadAllAttachments("Timesheet", data.name, checkInImage.value)
+            get_current_location()
         },
         onError(e) {
             errorMessage.value = e
@@ -110,26 +165,26 @@ const timesheet = createListResource({
         }
     },
     setValue: {
-        onSuccess() {
-            let title;
+        onSuccess(data) {
             if (cameraMode.value === 'Upload') {
-                title = "Additional Photo Uploaded"
+                uploading.value = false
                 cameraMode.value = 'Check-Out'
+                toast({
+                    title: "Success",
+                    text: "Additional Photo Uploaded",
+                    icon: "check-circle",
+                    position: "bottom-center",
+                    iconClasses: "text-blue-500",
+                });
                 timesheet.fetch()
             }
             else {
+                timesheetEntry.value = data
+                get_current_location()
                 cameraMode.value = "Check-In"
                 actionName.value = "Check-In"
                 projectName.value = ''
-                title = "Checked Out"
             }
-            toast({
-                title: "Success",
-                text: title,
-                icon: "check-circle",
-                position: "bottom-center",
-                iconClasses: "text-blue-500",
-            });
         },
         onError(e) {
             errorMessage.value = e
@@ -164,28 +219,41 @@ const projectAllocationResource = createResource({
 })
 
 function displayInstructions() {
-    let promise = get_instructions(dayjs().format("YYYY-MM-DD"),projectName.value,employee.name)
+    let promise = get_instructions(dayjs().format("YYYY-MM-DD"), projectName.value, employee.name)
     promise
-        .then((d)=>{
+        .then((d) => {
             instructions.value = d
         })
 }
 
 const teamMembers = createResource({
-    url : "trackit.api.get_team_members",
-    makeParams(){
+    url: "trackit.api.get_team_members",
+    makeParams() {
         return {
-            project_name : projectName.value
+            project_name: projectName.value
         }
     },
-    transform(data){
+    transform(data) {
         for (let d of data) {
-        d.members = JSON.parse(d.members)
-      }
-      return data  
+            d.members = JSON.parse(d.members)
+        }
+        return data
     },
-    onSuccess(d){
+    onSuccess(d) {
         members.value = d[0].members
+    }
+})
+
+const projectResource = createListResource({
+    doctype: "Project",
+    fields: ["customer", "name"],
+    onSuccess(d) {
+        customer.value = d[0].customer
+        projectId.value = d[0].name
+    },
+    onError(e) {
+        errorMessage.value = e
+        showError.value = true
     }
 })
 
@@ -214,16 +282,18 @@ async function uploadAllAttachments(documentType, documentName, attachments) {
 }
 
 async function handleImageCapture(file) {
+    uploading.value = true
     if (cameraMode.value === 'Check-In') {
         checkInImage.value = [file]
         checkIn()
     }
     else {
         await uploadAllAttachments("Timesheet", timesheetDetails.value.name, [file])
-        if(cameraMode.value === "Upload"){
+        if (cameraMode.value === "Upload") {
             additionalImage()
+
         }
-        else{
+        else {
             checkOut()
         }
     }
@@ -231,19 +301,6 @@ async function handleImageCapture(file) {
 
 const workTimings = createResource({
     url: "trackit.api.get_work_time_settings",
-})
-
-const projectResource = createListResource({
-    doctype: "Project",
-    fields: ["customer", "name"],
-    onSuccess(d) {
-        customer.value = d[0].customer
-        projectId.value = d[0].name
-    },
-    onError(e) {
-        errorMessage.value = e
-        showError.value = true
-    }
 })
 
 function checkIn() {
@@ -259,18 +316,18 @@ function checkIn() {
     })
 }
 
-function additionalImage(){
+function additionalImage() {
     timesheet.setValue.submit({
         name: timesheetDetails.value.name,
         note: timesheetDetails.value.note + "<p>Additional Photo added at " + dayjs().format("hh:mm:ss A") + "</p>"
     })
 }
 
-async function checkOut(){
+async function checkOut() {
     await workTimings.fetch()
     let time_logs = []
-    let start_time = dayjs(workTimings.data.start_time,'HH:mm:ss')
-    let end_time = dayjs(workTimings.data.end_time,'HH:mm:ss')
+    let start_time = dayjs(workTimings.data.start_time, 'HH:mm:ss')
+    let end_time = dayjs(workTimings.data.end_time, 'HH:mm:ss')
     let from_time = dayjs(timesheetDetails.value.from_time)
     let time = dayjs()
 

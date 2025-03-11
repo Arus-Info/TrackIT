@@ -1,5 +1,5 @@
 import router from '@/router'
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { createResource } from 'frappe-ui'
 
 import { userResource } from './user'
@@ -26,8 +26,13 @@ export const session = reactive({
       userResource.reload()
       session.user = sessionUser()
       session.login.reset()
-      router.replace(data.default_route || '/')
+      router.replace(data.default_route || '/home')
     },
+    onError(error){
+      if(error.exc_type  == "AuthenticationError"){
+        showAuthenticationError.value = true
+      } 
+    }
   }),
   logout: createResource({
     url: 'logout',
@@ -40,3 +45,5 @@ export const session = reactive({
   user: sessionUser(),
   isLoggedIn: computed(() => !!session.user),
 })
+
+export const showAuthenticationError = ref(false);

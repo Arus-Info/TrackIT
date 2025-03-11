@@ -11,9 +11,9 @@
         </div>
       </div>
     </div>
-    <div class=" pt-15 flex justify-evenly ">
-      <ThemeButton name="WorkIT" @click="router.push({name : 'WorkIT'})"></ThemeButton>
-      <ThemeButton name="ProjectIT"></ThemeButton>
+    <div class=" pt-15 flex justify-evenly " v-if="mobileModules.data">
+        <ThemeButton v-if="mobileModules.data.includes('WorkIT')" name="WorkIT" @click="router.push({name : 'WorkIT'})"></ThemeButton>
+        <ThemeButton  v-if="mobileModules.data.includes('ProjectIT')" name="ProjectIT"  @click="router.push({name : 'ProjectIT'})"></ThemeButton>
     </div>
   </div>
 
@@ -21,7 +21,7 @@
 
 <script setup>
 import { ref,inject } from 'vue'
-import { createResource } from 'frappe-ui'
+import { createResource, createListResource } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import { userResource } from '../data/user'
 import ThemeButton from '../components/ThemeButton.vue'
@@ -43,4 +43,19 @@ const employeeResource = createResource({
   },
   auto: true,
 })
+
+const mobileModules = createListResource({
+  doctype : "Employee",
+  fields : ['custom_mobile_module.module_name'],
+  filters : {"name" : employee.name},
+  transform(data){
+    let t_data = []
+    for(let d of data){
+      t_data.push(d.module_name)
+    }
+    return t_data
+  },
+  auto : true,
+})
+
 </script>
