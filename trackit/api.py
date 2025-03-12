@@ -13,7 +13,8 @@ def get_project_allocation(employee_id):
         select pai.project_name
         from `tabProject Allocation and Instrucions` as  pai 
         left join `tabEmployee Allocation Instruction` as  eai on eai.parent = pai.name
-        where eai.employee = %(employee_id)s 
+        left join tabProject as p on p.name = pai.project
+        where eai.employee = %(employee_id)s and p.status = 'Open'
         """,{"employee_id" : employee_id},as_dict = True)
     return project_list
 
