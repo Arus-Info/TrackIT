@@ -11,9 +11,14 @@
         </div>
       </div>
     </div>
-    <div class=" pt-15 flex justify-evenly " v-if="mobileModules.data">
+    <div class=" pt-15 flex justify-evenly " v-if="mobileModules.data && employee.name">
         <ThemeButton v-if="mobileModules.data.includes('WorkIT')" name="WorkIT" @click="router.push({name : 'WorkIT'})"></ThemeButton>
         <ThemeButton  v-if="mobileModules.data.includes('ProjectIT')" name="ProjectIT"  @click="router.push({name : 'ProjectIT'})"></ThemeButton>
+    </div>
+    <div v-else class="pt-10 pl-6 pr-6">
+      <div class=" pt-3 pb-4 border-2 border-[#B9C8EA] text-center rounded-lg bg-[#D6E1F9] font-[Inter] font-[600]">
+        You are not an Employee
+      </div>
     </div>
   </div>
 
