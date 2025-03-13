@@ -5,7 +5,7 @@
                 <tr class="bg-[#4A6BB6]">
                     <td class="first:rounded-tl-lg first:border-white last:border-white last:rounded-tr-lg pt-2 pb-2 pl-1 pr-1"
                         v-for="h in header">
-                        <p class="text-center">{{ h }}</p>
+                        <p class="text-center text-white font-[600]">{{ h }}</p>
                     </td>
                 </tr>
                 <tr v-for="line in props.listData.data" class="even:bg-[#F4F8FF]">

@@ -11,13 +11,17 @@
         </div>
       </div>
     </div>
-    <div class=" pt-15 flex justify-evenly " v-if="mobileModules.data && employee.name">
-        <ThemeButton v-if="mobileModules.data.includes('WorkIT')" name="WorkIT" @click="router.push({name : 'WorkIT'})"></ThemeButton>
-        <ThemeButton  v-if="mobileModules.data.includes('ProjectIT')" name="ProjectIT"  @click="router.push({name : 'ProjectIT'})"></ThemeButton>
-    </div>
-    <div v-else class="pt-10 pl-6 pr-6">
-      <div class=" pt-3 pb-4 border-2 border-[#B9C8EA] text-center rounded-lg bg-[#D6E1F9] font-[Inter] font-[600]">
-        You are not an Employee
+    <div v-if="! mobileModules.list.loading">
+      <div class=" pt-15 flex justify-evenly " v-if="mobileModules.data && employee.name">
+        <ThemeButton v-if="mobileModules.data.includes('WorkIT')" name="WorkIT" @click="router.push({ name: 'WorkIT' })">
+        </ThemeButton>
+        <ThemeButton v-if="mobileModules.data.includes('ProjectIT')" name="ProjectIT"
+          @click="router.push({ name: 'ProjectIT' })"></ThemeButton>
+      </div>
+      <div v-else class="pt-10 pl-6 pr-6">
+        <div class=" pt-3 pb-4 border-2 border-[#B9C8EA] text-center rounded-lg bg-[#D6E1F9] font-[Inter] font-[600]">
+          You are not an Employee
+        </div>
       </div>
     </div>
   </div>
@@ -25,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref,inject } from 'vue'
+import { inject } from 'vue'
 import { createResource, createListResource } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import { userResource } from '../data/user'
